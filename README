@@ -6,4 +6,4 @@ then run
 
 give the number of switches and hosts when asked
 
-wait for 10 seconds before testing pingall for network discovery
+wait for 10 (for each 20 devices you add) seconds before testing pingall for network discovery
