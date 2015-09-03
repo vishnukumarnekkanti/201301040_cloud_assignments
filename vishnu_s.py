@@ -11,8 +11,9 @@ topology enables one to pass in '--topo=mytopo' from the command line.
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.util import dumpNodeConnections                                                                   
-from mininet.node import Controller, RemoteController
+from mininet.node import Controller, RemoteController, OVSController, CPULimitedHost
 from mininet.cli import CLI
+from mininet.link import TCIntf, TCLink
 import os                                                               
 
 class MyTopo( Topo ):
@@ -60,12 +61,12 @@ class MyTopo( Topo ):
         print skey
         i = 1
         for x in skey:
-            self.addLink(swi[x], hos[i])
+            self.addLink(swi[x], hos[i],bw=((x%2)+1))
             i = i+1
 
 def testTopo(snum,hnum):
     topo = MyTopo(snum, hnum)
-    net = Mininet(topo, controller=RemoteController)
+    net = Mininet(topo, link=TCLink, controller=RemoteController)
     net.start()
     net.addController('c0', controller=RemoteController,ip="127.0.0.1",port=6633)
     #print "hereeeeeeeeeeeeeee"
@@ -73,11 +74,11 @@ def testTopo(snum,hnum):
     for x in xrange(hnum):
         for y in xrange(hnum):
             if x%2==0 and y%2==1:
-                net.nameToNode["h"+str(x+1)].cmd("iptables -A OUTPUT -o h1-eth0 -d 10.0.0."+ str(y+1)+" -j DROP")
-                net.nameToNode["h"+str(y+1)].cmd("iptables -A OUTPUT -o h1-eth0 -d 10.0.0."+ str(x+1)+" -j DROP")
-            if x%2==1 and y%2==0:
-                net.nameToNode["h"+str(x+1)].cmd("iptables -A OUTPUT -o h1-eth0 -d 10.0.0."+ str(y+1)+" -j DROP")
-                net.nameToNode["h"+str(y+1)].cmd("iptables -A OUTPUT -o h1-eth0 -d 10.0.0."+ str(x+1)+" -j DROP")
+                net.nameToNode["h"+str(x+1)].cmd("iptables -A OUTPUT -o h"+str(x+1)+"-eth0 -d 10.0.0."+ str(y+1)+" -j DROP")
+                #net.nameToNode["h"+str(y+1)].cmd("iptables -A OUTPUT -o h1-eth"++" -d 10.0.0."+ str(x+1)+" -j DROP")
+            #if x%2==1 and y%2==0:
+             #   net.nameToNode["h"+str(x+1)].cmd("iptables -A OUTPUT -o h1-eth0"++" -d 10.0.0."+ str(y+1)+" -j DROP")
+              #  net.nameToNode["h"+str(y+1)].cmd("iptables -A OUTPUT -o h1-eth0"++" -d 10.0.0."+ str(x+1)+" -j DROP")
     dumpNodeConnections(net.switches)
     CLI(net)
 
